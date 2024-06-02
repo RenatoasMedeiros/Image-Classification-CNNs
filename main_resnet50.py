@@ -3,17 +3,23 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import os
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Activation, Dropout, Flatten, Dense, Conv2D, MaxPooling2D
-from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
+from tensorflow.keras.layers import GlobalAveragePooling2D, Dropout, Dense, BatchNormalization
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.applications import ResNet50
+from tensorflow.keras.mixed_precision import set_global_policy
+from tensorflow.keras.regularizers import l2
+
+# Enable mixed precision training
+set_global_policy('mixed_float16')
 
 # Define constants
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 IMG_SIZE = 32
 NUM_CLASSES = 10  # Number of classes to identify
 NUM_EPOCHS = 30
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.0001  # Lower learning rate for fine-tuning
 
 # Define directories
 train_dirs = ['./dataset/train/train1', './dataset/train/train2', './dataset/train/train3', './dataset/train/train5']
@@ -24,12 +30,13 @@ test_dir = './dataset/test'
 train_datagen = ImageDataGenerator(
     rescale=1./255,
     rotation_range=40,
-    width_shift_range=0.3,
-    height_shift_range=0.3,
-    shear_range=0.3,
-    zoom_range=0.3,
+    width_shift_range=0.2,
+    height_shift_range=0.2,
+    shear_range=0.2,
+    zoom_range=0.2,
     horizontal_flip=True,
     fill_mode='nearest')
+
 
 validation_datagen = ImageDataGenerator(rescale=1./255)
 test_datagen = ImageDataGenerator(rescale=1./255)
@@ -41,11 +48,12 @@ train_generators = [train_datagen.flow_from_directory(
     batch_size=BATCH_SIZE,
     class_mode='categorical') for train_dir in train_dirs]
 
-# Custom generator to merge multiple directories
+# Custom generator to merge multiple directories and repeat
 def combined_generator(generators):
     while True:
         for generator in generators:
-            yield next(generator)
+            for batch in generator:
+                yield batch
 
 train_generator = combined_generator(train_generators)
 
@@ -62,35 +70,22 @@ test_generator = test_datagen.flow_from_directory(
     batch_size=BATCH_SIZE,
     class_mode='categorical')
 
-# Function to plot images
-def plot_images(images_arr):
-    fig, axes = plt.subplots(1, 10, figsize=(20,20))
-    axes = axes.flatten()
-    for img, ax in zip(images_arr, axes):
-        ax.imshow(img)
-        ax.axis('off')
-    plt.tight_layout()
-    plt.savefig('./plot.png')
-    plt.show()
+# Load the pre-trained ResNet50 model without the top layer and adjust input shape
+base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(IMG_SIZE, IMG_SIZE, 3))
 
-# Generate a batch of images and display them
-sample_batch = next(train_generator)
-plot_images(sample_batch[0][:10])
+# Unfreeze some top layers of the base model
+for layer in base_model.layers[-40:]:
+    layer.trainable = True
 
 # Define the model
 model = Sequential([
-    Conv2D(32, (3, 3), activation='relu', input_shape=(IMG_SIZE, IMG_SIZE, 3)),
-    MaxPooling2D((2, 2)),
-    Dropout(0.3),
-    Conv2D(64, (3, 3), activation='relu'),
-    MaxPooling2D((2, 2)),
-    Dropout(0.3),
-    Conv2D(128, (3, 3), activation='relu'),
-    MaxPooling2D((2, 2)),
-    Flatten(),
-    Dense(512, activation='relu'),
-    Dropout(0.5),
-    Dense(NUM_CLASSES, activation='softmax')
+    base_model,
+    BatchNormalization(),
+    GlobalAveragePooling2D(),
+    Dense(512, activation='relu', kernel_regularizer=l2(0.01)),
+    Dropout(0.7),
+    BatchNormalization(),
+    Dense(NUM_CLASSES, activation='softmax', dtype='float32')
 ])
 
 # Compile the model
@@ -101,11 +96,13 @@ model.compile(optimizer=Adam(learning_rate=LEARNING_RATE),
 model.summary()
 
 # Define callbacks
-checkpoint = ModelCheckpoint("best_model.keras", monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
-early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
+checkpoint = ModelCheckpoint("best_model_resnet50.keras", monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=4, min_lr=0.00001, verbose=1)
 
 # Calculate steps per epoch
 steps_per_epoch = sum([gen.samples // BATCH_SIZE for gen in train_generators])
+validation_steps = validation_generator.samples // BATCH_SIZE
 
 # Train the model
 history = model.fit(
@@ -113,8 +110,8 @@ history = model.fit(
     steps_per_epoch=steps_per_epoch,
     epochs=NUM_EPOCHS,
     validation_data=validation_generator,
-    validation_steps=validation_generator.samples // BATCH_SIZE,
-    callbacks=[checkpoint, early_stopping]
+    validation_steps=validation_steps,
+    callbacks=[checkpoint, early_stopping, reduce_lr]
 )
 
 # Evaluate the model
