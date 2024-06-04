@@ -17,15 +17,19 @@ IMG_SIZE = 71  # Adjusted for Xception model
 NUM_CLASSES = 10
 NUM_EPOCHS = 30
 LEARNING_RATE = 0.001
-EXPECTED_TRAIN_STEPS = 1250  # Number of steps per epoch (total_train_samples // BATCH_SIZE)
+# Number of steps per epoch (total_train_samples // BATCH_SIZE)
+EXPECTED_TRAIN_STEPS = 1250
 
 # Define directories
-train_dir='./dataset/train'
-train_dirs = ['./dataset/train/train1', './dataset/train/train2', './dataset/train/train3', './dataset/train/train5']
+train_dir = './dataset/train'
+train_dirs = ['./dataset/train/train1', './dataset/train/train2',
+              './dataset/train/train3', './dataset/train/train5']
 validation_dir = './dataset/validation'
 test_dir = './dataset/test'
 
 # Function to count files in each folder
+
+
 def count_files(directory):
     count = 0
     for root, dirs, files in os.walk(directory):
@@ -33,6 +37,8 @@ def count_files(directory):
     return count
 
 # Function to count files in each directory
+
+
 def count_files_in_dirs(dirs):
     total_count = 0
     for dir_path in dirs:
@@ -41,8 +47,10 @@ def count_files_in_dirs(dirs):
         print(f"Number of files in {dir_path}: {count}")
     return total_count
 
+
 # List all the train folders
-train_folders = [folder for folder in os.listdir(train_dir) if folder.startswith('train')]
+train_folders = [folder for folder in os.listdir(
+    train_dir) if folder.startswith('train')]
 
 # Iterate over each train folder
 for train_folder in train_folders:
@@ -77,7 +85,8 @@ train_datagen = ImageDataGenerator(
     horizontal_flip=True,
     fill_mode='nearest')
 
-validation_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+validation_datagen = ImageDataGenerator(
+    preprocessing_function=preprocess_input)
 test_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
 
 # Create multiple train generators
@@ -98,6 +107,8 @@ print(f"Number of batches in train generator: {num_train_batches}")
 print(f"Total number of images in train dataset: {total_train_images}")
 
 # Create a custom data generator class
+
+
 class CustomDataGenerator(Sequence):
     def __init__(self, generators):
         self.generators = generators
@@ -111,6 +122,7 @@ class CustomDataGenerator(Sequence):
                 return generator[idx]
             idx -= len(generator)
         raise IndexError('Index out of range')
+
 
 # Create a custom data generator instance
 custom_train_generator = CustomDataGenerator(train_generators)
@@ -140,7 +152,8 @@ test_generator = test_datagen.flow_from_directory(
     class_mode='categorical')
 
 # Load the pre-trained Xception model without the top layer
-base_model = Xception(weights='imagenet', include_top=False, input_shape=(IMG_SIZE, IMG_SIZE, 3))
+base_model = Xception(weights='imagenet', include_top=False,
+                      input_shape=(IMG_SIZE, IMG_SIZE, 3))
 
 # Freeze the base model
 for layer in base_model.layers:
@@ -152,6 +165,10 @@ model = Sequential([
     Flatten(),
     Dense(512, activation='relu'),
     Dropout(0.5),
+    Dense(512, activation='relu'),
+    Dropout(0.5),
+    Dense(512, activation='relu'),
+    Dropout(0.5),
     Dense(NUM_CLASSES, activation='softmax')
 ])
 
@@ -159,10 +176,11 @@ model = Sequential([
 model.compile(optimizer=Adam(learning_rate=LEARNING_RATE),
               loss='categorical_crossentropy',
               metrics=['accuracy'])
-
 model.summary()
 
 # Define custom callback to save the best model only if the epoch is fully trained
+
+
 class CustomModelCheckpoint(ModelCheckpoint):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -171,15 +189,18 @@ class CustomModelCheckpoint(ModelCheckpoint):
         if logs.get('batch') == EXPECTED_TRAIN_STEPS:
             super().on_epoch_end(epoch, logs)
 
+
 # Define callbacks
-checkpoint = CustomModelCheckpoint("best_model_xception.keras", monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
-early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
+checkpoint = CustomModelCheckpoint(
+    "best_model_xception.keras", monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+early_stopping = EarlyStopping(
+    monitor='val_loss', patience=5, restore_best_weights=True)
 
 # Calculate steps per epoch
 total_train_samples = sum([gen.samples for gen in train_generators])
 steps_per_epoch = total_train_samples // BATCH_SIZE
-print(f"total_train_samples = {total_train_samples}" )
-print(f"steps_per_epoch = {steps_per_epoch}" )
+print(f"total_train_samples = {total_train_samples}")
+print(f"steps_per_epoch = {steps_per_epoch}")
 
 # Train the model using the custom data generator
 history = model.fit(

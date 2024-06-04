@@ -108,7 +108,7 @@ model.compile(optimizer=Adam(learning_rate=LEARNING_RATE),
 model.summary()
 
 # Define callbacks
-checkpoint = ModelCheckpoint("best_model_resnet50.keras",
+checkpoint = ModelCheckpoint("models/best_model_resnet50.keras",
                              monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 early_stopping = EarlyStopping(
     monitor='val_loss', patience=10, restore_best_weights=True)
