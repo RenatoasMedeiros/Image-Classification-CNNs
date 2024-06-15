@@ -5,13 +5,3 @@ Project_Sheet_AI.pdf
 test.ipynb
 test.py
 .vscode/settings.json
-.local/
-.keras/
-.kaggle/
-.jupyter/
-.ipython/
-.ipython_checkpoints/
-.cache/
-.config/
-.nv/
-*.keras

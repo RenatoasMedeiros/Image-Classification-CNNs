@@ -1,0 +1,13 @@
+{
+  "shell_port": 59881,
+  "iopub_port": 49299,
+  "stdin_port": 57953,
+  "control_port": 60581,
+  "hb_port": 40345,
+  "ip": "127.0.0.1",
+  "key": "47956087-7b5de3ae9b718a8385e0d3c2",
+  "transport": "tcp",
+  "signature_scheme": "hmac-sha256",
+  "kernel_name": "python3",
+  "jupyter_session": "/project/main_Batch_48-tests.ipynb"
+}
