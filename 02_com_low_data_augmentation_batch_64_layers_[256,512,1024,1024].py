@@ -1,4 +1,6 @@
 # %%
+from tensorflow.keras.metrics import Metric
+from tensorflow.keras import backend as K
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -21,7 +23,8 @@ DENSE_LAYERS = [256, 512, 1024, 1024]
 
 # %%
 # Define directories
-train_dirs = ['./dataset/train/train1', './dataset/train/train2', './dataset/train/train3', './dataset/train/train5']
+train_dirs = ['./dataset/train/train1', './dataset/train/train2',
+              './dataset/train/train3', './dataset/train/train5']
 validation_dir = './dataset/validation'
 test_dir = './dataset/test'
 
@@ -71,14 +74,14 @@ test_generator = test_datagen.flow_from_directory(
     class_mode='categorical')
 
 # %%
-from tensorflow.keras import backend as K
-from tensorflow.keras.metrics import Metric
+
 
 class Precision(Metric):
     def __init__(self, name='precision', **kwargs):
         super(Precision, self).__init__(name=name, **kwargs)
         self.true_positives = self.add_weight(name='tp', initializer='zeros')
-        self.predicted_positives = self.add_weight(name='pp', initializer='zeros')
+        self.predicted_positives = self.add_weight(
+            name='pp', initializer='zeros')
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         y_pred = K.round(y_pred)
@@ -92,6 +95,7 @@ class Precision(Metric):
     def reset_states(self):
         self.true_positives.assign(0)
         self.predicted_positives.assign(0)
+
 
 class Recall(Metric):
     def __init__(self, name='recall', **kwargs):
@@ -111,6 +115,7 @@ class Recall(Metric):
     def reset_states(self):
         self.true_positives.assign(0)
         self.actual_positives.assign(0)
+
 
 class F1Score(Metric):
     def __init__(self, name='f1_score', **kwargs):
@@ -143,25 +148,25 @@ model = Sequential([
     Activation('relu'),
     MaxPooling2D((2, 2)),
     Dropout(0.3),
-    
+
     Conv2D(DENSE_LAYERS[1], (3, 3)),
     BatchNormalization(),
     Activation('relu'),
     MaxPooling2D((2, 2)),
     Dropout(0.5),
-    
+
     Conv2D(DENSE_LAYERS[2], (3, 3)),
     BatchNormalization(),
     Activation('relu'),
     MaxPooling2D((2, 2)),
     Dropout(0.5),
-    
+
     Flatten(),
     Dense(DENSE_LAYERS[3]),
     BatchNormalization(),
     Activation('relu'),
     Dropout(0.5),
-    
+
     Dense(NUM_CLASSES, activation='softmax')
 ])
 
@@ -177,16 +182,20 @@ model.summary()
 # Definir os Callbacks
 
 # Para salvar o melhor modelo com base na acurácia de validação
-checkpoint = ModelCheckpoint("models/02_com_data_augmentation_batch_size_64_layers_[256,512,1024,1024].keras", monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+checkpoint = ModelCheckpoint(
+    "models/02_com_low_data_augmentation_batch_size_64_layers_[256,512,1024,1024].keras", monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 
 # Parar o treinamento se não houver melhoria na loss após x epochs
-early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
+early_stopping = EarlyStopping(
+    monitor='val_loss', patience=5, restore_best_weights=True)
 
 # Salvar para csv
-csv_logger = CSVLogger(f'logs/02_com_data_augmentation_batch_size_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.csv', append=True)
+csv_logger = CSVLogger(
+    f'logs/02_com_low_data_augmentation_batch_size_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.csv', append=True)
 
 # Reduzir a learning rate se não houver melhoria na loss após x epochs (lembrar de deixar este valor sempre menor que a patience no early_stopping!!)
-reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, verbose=1)
+reduce_lr = ReduceLROnPlateau(
+    monitor='val_loss', factor=0.5, patience=3, verbose=1)
 
 # %%
 # Calculate steps per epoch
@@ -235,8 +244,7 @@ plt.ylim([0, 1])
 plt.legend(loc='lower right')
 plt.title('Validation Precision, Recall, F1 Score')
 
-plt.savefig(f'./plots/02_com_data_augmentation_batch_{BATCH_SIZE}_layers_{DENSE_LAYERS}.png')
+plt.savefig(
+    f'./plots/02_com_low_data_augmentation_batch_{BATCH_SIZE}_layers_{DENSE_LAYERS}.png')
 plt.tight_layout()
-#plt.show()
-
-
+# plt.show()
