@@ -1,3 +1,5 @@
+from tensorflow.keras.metrics import Metric
+from tensorflow.keras import backend as K
 import os
 import json
 import matplotlib.pyplot as plt
@@ -50,9 +52,71 @@ train_generators = [train_datagen.flow_from_directory(
     batch_size=BATCH_SIZE,
     class_mode='categorical') for train_dir in train_dirs]
 
+# %% metrics
+
+
+class Precision(Metric):
+    def __init__(self, name='precision', **kwargs):
+        super(Precision, self).__init__(name=name, **kwargs)
+        self.true_positives = self.add_weight(name='tp', initializer='zeros')
+        self.predicted_positives = self.add_weight(
+            name='pp', initializer='zeros')
+
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        y_pred = K.round(y_pred)
+        y_true = K.cast(y_true, 'float32')
+        self.true_positives.assign_add(K.sum(y_true * y_pred))
+        self.predicted_positives.assign_add(K.sum(y_pred))
+
+    def result(self):
+        return self.true_positives / (self.predicted_positives + K.epsilon())
+
+    def reset_states(self):
+        self.true_positives.assign(0)
+        self.predicted_positives.assign(0)
+
+
+class Recall(Metric):
+    def __init__(self, name='recall', **kwargs):
+        super(Recall, self).__init__(name=name, **kwargs)
+        self.true_positives = self.add_weight(name='tp', initializer='zeros')
+        self.actual_positives = self.add_weight(name='ap', initializer='zeros')
+
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        y_pred = K.round(y_pred)
+        y_true = K.cast(y_true, 'float32')
+        self.true_positives.assign_add(K.sum(y_true * y_pred))
+        self.actual_positives.assign_add(K.sum(y_true))
+
+    def result(self):
+        return self.true_positives / (self.actual_positives + K.epsilon())
+
+    def reset_states(self):
+        self.true_positives.assign(0)
+        self.actual_positives.assign(0)
+
+
+class F1Score(Metric):
+    def __init__(self, name='f1_score', **kwargs):
+        super(F1Score, self).__init__(name=name, **kwargs)
+        self.precision = Precision()
+        self.recall = Recall()
+
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        self.precision.update_state(y_true, y_pred)
+        self.recall.update_state(y_true, y_pred)
+
+    def result(self):
+        precision = self.precision.result()
+        recall = self.recall.result()
+        return 2 * ((precision * recall) / (precision + recall + K.epsilon()))
+
+    def reset_states(self):
+        self.precision.reset_states()
+        self.recall.reset_states()
+
+
 # Custom generator to merge multiple directories and repeat
-
-
 def combined_generator(generators):
     while True:
         for generator in generators:
@@ -94,6 +158,10 @@ def residual_block(x, units):
     x = Dense(units, activation='relu', kernel_regularizer=l2(0.03))(x)
     x = Dropout(0.5)(x)
     x = BatchNormalization()(x)
+    x = Dense(units, activation='relu', kernel_regularizer=l2(0.03))(x)
+    x = Dropout(0.5)(x)
+    x = BatchNormalization()(x)
+    shortcut = Dense(units, kernel_regularizer=l2(0.03))(shortcut)
     x = Add()([x, shortcut])
     return x
 
@@ -127,7 +195,7 @@ def lr_scheduler(epoch, lr):
 # Compile the model
 model.compile(optimizer=Adam(learning_rate=LEARNING_RATE),
               loss=loss,
-              metrics=['accuracy'])
+              metrics=['accuracy', Precision(), Recall(), F1Score()])
 
 model.summary()
 
@@ -158,8 +226,9 @@ history = model.fit(
     callbacks=[checkpoint, early_stopping, reduce_lr, csv_logger, lr_scheduler]
 )
 
-# Plot training history and save the plot
-plt.figure()
+# Plot training history
+plt.figure(figsize=(12, 8))
+plt.subplot(2, 1, 1)
 plt.plot(history.history['accuracy'], label='train_accuracy')
 plt.plot(history.history['val_accuracy'], label='val_accuracy')
 plt.xlabel('Epoch')
@@ -167,4 +236,17 @@ plt.ylabel('Accuracy')
 plt.ylim([0, 1])
 plt.legend(loc='lower right')
 plt.title('Training and Validation Accuracy')
+
+plt.subplot(2, 1, 2)
+plt.plot(history.history['val_precision'], label='val_precision')
+plt.plot(history.history['val_recall'], label='val_recall')
+plt.plot(history.history['val_f1_score'], label='val_f1_score')
+plt.xlabel('Epoch')
+plt.ylabel('Metrics')
+plt.ylim([0, 1])
+plt.legend(loc='lower right')
+plt.title('Validation Precision, Recall, F1 Score')
+
+plt.tight_layout()
 plt.show()
+plt.savefig('./plots/main_resnet50_all_unfrozen_L2_batch_64.png')
