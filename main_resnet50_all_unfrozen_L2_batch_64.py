@@ -51,11 +51,14 @@ train_generators = [train_datagen.flow_from_directory(
     class_mode='categorical') for train_dir in train_dirs]
 
 # Custom generator to merge multiple directories and repeat
+
+
 def combined_generator(generators):
     while True:
         for generator in generators:
             for batch in generator:
                 yield batch
+
 
 train_generator = combined_generator(train_generators)
 
@@ -81,6 +84,8 @@ for layer in base_model.layers:
     layer.trainable = True
 
 # Define the model with adjusted parameters to reduce overfitting
+
+
 def residual_block(x, units):
     shortcut = x
     x = Dense(units, activation='relu', kernel_regularizer=l2(0.03))(x)
@@ -91,6 +96,7 @@ def residual_block(x, units):
     x = BatchNormalization()(x)
     x = Add()([x, shortcut])
     return x
+
 
 x = base_model.output
 x = GlobalAveragePooling2D()(x)
@@ -109,11 +115,14 @@ model = Model(inputs=base_model.input, outputs=x)
 loss = CategoricalCrossentropy(label_smoothing=0.1)
 
 # Learning rate scheduler
+
+
 def lr_scheduler(epoch, lr):
     if epoch < 10:
         return lr
     else:
         return lr * 0.99
+
 
 # Compile the model
 model.compile(optimizer=Adam(learning_rate=LEARNING_RATE),
@@ -124,7 +133,7 @@ model.summary()
 
 # Define callbacks
 os.makedirs('outputs', exist_ok=True)
-checkpoint = ModelCheckpoint("models/best_model_resnet50_7.keras",
+checkpoint = ModelCheckpoint("models/best_model_main_resnet50_all_unfrozen_L2_batch_64.keras",
                              monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 early_stopping = EarlyStopping(
     monitor='val_loss', patience=10, restore_best_weights=True)  # Increased patience

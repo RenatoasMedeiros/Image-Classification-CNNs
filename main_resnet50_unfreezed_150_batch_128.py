@@ -120,7 +120,7 @@ model.summary()
 # %%
 # Define callbacks
 os.makedirs('outputs', exist_ok=True)
-checkpoint = ModelCheckpoint("models/best_model_resnet50_7.keras",
+checkpoint = ModelCheckpoint("models/best_main_resnet50_unfreezed_150_batch_128.keras",
                              monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 early_stopping = EarlyStopping(
     monitor='val_loss', patience=10, restore_best_weights=True)  # Increased patience

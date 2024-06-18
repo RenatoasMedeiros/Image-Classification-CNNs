@@ -73,11 +73,11 @@ test_generator = test_datagen.flow_from_directory(
 
 # %%
 model = Sequential([
-    Conv2D(128, (3, 3), input_shape=(IMG_SIZE, IMG_SIZE, 3)),
-    BatchNormalization(),
-    Activation('relu'),
-    MaxPooling2D((2, 2)),
-    Dropout(0.3),
+    # Conv2D(128, (3, 3), input_shape=(IMG_SIZE, IMG_SIZE, 3)),
+    # BatchNormalization(),
+    # Activation('relu'),
+    # MaxPooling2D((2, 2)),
+    # Dropout(0.3),
 
     Conv2D(256, (3, 3)),
     BatchNormalization(),
@@ -115,11 +115,11 @@ model.summary()
 # %%
 # Define callbacks
 checkpoint = ModelCheckpoint(
-    "best_model.keras", monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+    "best_model_main_data_augmentation.keras", monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 early_stopping = EarlyStopping(
     monitor='val_loss', patience=5, restore_best_weights=True)
 csv_logger = CSVLogger(
-    f'training_log_notpretrained_batch_size_{BATCH_SIZE}_image_size_{IMG_SIZE}.csv', append=True)
+    f'main_data_augmentation_batch_{BATCH_SIZE}_image_size_{IMG_SIZE}.csv', append=True)
 
 # %%
 # Calculate steps per epoch

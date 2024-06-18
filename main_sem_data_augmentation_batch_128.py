@@ -108,11 +108,11 @@ model.summary()
 # %%
 # Define callbacks
 checkpoint = ModelCheckpoint(
-    "best_model.keras", monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+    "best_model_main_sem_data_augmentation_batch_128.keras", monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 early_stopping = EarlyStopping(
     monitor='val_loss', patience=5, restore_best_weights=True)
 csv_logger = CSVLogger(
-    f'training_log_no_aug_notpretrained_batch_size_{BATCH_SIZE}_image_size_{IMG_SIZE}.csv', append=True)
+    f'main_sem_data_augmentation_batch_{BATCH_SIZE}_image_size_{IMG_SIZE}.csv', append=True)
 reduce_lr = ReduceLROnPlateau(
     monitor='val_loss', factor=0.5, patience=3, verbose=1)
 

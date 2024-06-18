@@ -1,7 +1,7 @@
 import subprocess
 
 scripts = [
-    "main_data_augmentation.py",
+    "main_data_augmentation.py",  # erro
     "main_resnet50_batch_64.py",
     "main_resnet50_unfreezed_100_batch_64.py",
     "main_resnet50_unfreezed_100_batch_128.py",
