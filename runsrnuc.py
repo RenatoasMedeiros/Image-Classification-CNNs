@@ -1,18 +1,20 @@
 import subprocess
 
 scripts = [
-    "main_data_augmentation.py",  # erro
-    "main_resnet50_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.py",
-    "main_resnet50_unfreezed_100_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.py",
-    "main_resnet50_unfreezed_100_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.py",
-    "main_resnet50_unfreezed_150_batch_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.py",
-    "main_resnet50_unfreezed_150_batch_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.py",
-    "main_sem_data_augmentation_batch_32.py",
-    "main_sem_data_augmentation_batch_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.py",
-    "main_sem_data_augmentation_batch_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.py",
-    "main_sem_data_augmentation_batch_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.py",
-    "main_sem_data_augmentation_batch_512.py",
-    "main_resnet50_all_unfrozen_L2_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.py",
+    'main_sem_data_augmentation_batch_32_layers_[256,512,1024,1024].py',
+    'main_sem_data_augmentation_batch_64_layers_[256,512,1024,1024].py',
+    'main_sem_data_augmentation_batch_128_layers_[256,512,1024,1024].py',
+    'main_sem_data_augmentation_batch_256_layers_[256,512,1024,1024].py',
+    '02_com_data_augmentation_batch_256_layers_[256,512,1024,1024].py',
+    '02_com_data_augmentation_batch_128_layers_[256,512,1024,1024].py',
+    '02_com_data_augmentation_batch_64_layers_[256,512,1024,1024].py',
+    '02_com_data_augmentation_batch_32_layers_[256,512,1024,1024].py',
+    'main_resnet50_unfreezed_50_batch_64_layers_[1024,512,256,128].py',
+    'main_resnet50_unfreezed_50_batch_128_layers_[1024,512,256,128].py',
+    'main_resnet50_unfreezed_100_batch_64_layers_[1024,512,256,128].py',
+    'main_resnet50_unfreezed_100_batch_128_layers_[1024,512,256,128].py',
+    'main_resnet50_sem_data_augmentation_unfreezed_50_batch_64_layers_[1024,512,256,128].py',
+    'main_resnet50_sem_data_augmentation_unfreezed_50_batch_128_layers_[1024,512,256,128].py',
 ]
 
 for script in scripts:
