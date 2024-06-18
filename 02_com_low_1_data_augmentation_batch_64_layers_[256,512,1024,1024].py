@@ -17,7 +17,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 BATCH_SIZE = 64
 IMG_SIZE = 32
 NUM_CLASSES = 10  # nº classes para identificar
-NUM_EPOCHS = 60
+NUM_EPOCHS = 100
 LEARNING_RATE = 0.001
 DENSE_LAYERS = [256, 512, 1024, 1024]
 
@@ -32,10 +32,10 @@ test_dir = './dataset/test'
 train_datagen = ImageDataGenerator(
     rescale=1./255,
     rotation_range=15,
-    width_shift_range=0.1,
-    height_shift_range=0.1,
-    shear_range=0.1,
-    zoom_range=0.05,
+    width_shift_range=0.01,
+    height_shift_range=0.01,
+    shear_range=0.01,
+    zoom_range=0.01,
     horizontal_flip=True,
     fill_mode='nearest')
 
@@ -183,15 +183,15 @@ model.summary()
 
 # Para salvar o melhor modelo com base na acurácia de validação
 checkpoint = ModelCheckpoint(
-    "models/02_com_low_data_augmentation_batch_size_64_layers_[256,512,1024,1024].keras", monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+    "models/02_com_low_1_data_augmentation_batch_size_64_layers_[256,512,1024,1024].keras", monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 
 # Parar o treinamento se não houver melhoria na loss após x epochs
 early_stopping = EarlyStopping(
-    monitor='val_loss', patience=5, restore_best_weights=True)
+    monitor='val_loss', patience=10, restore_best_weights=True)
 
 # Salvar para csv
 csv_logger = CSVLogger(
-    f'logs/02_com_low_data_augmentation_batch_size_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.csv', append=True)
+    f'logs/02_com_low_1_data_augmentation_batch_size_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.csv', append=True)
 
 # Reduzir a learning rate se não houver melhoria na loss após x epochs (lembrar de deixar este valor sempre menor que a patience no early_stopping!!)
 reduce_lr = ReduceLROnPlateau(
@@ -245,6 +245,6 @@ plt.legend(loc='lower right')
 plt.title('Validation Precision, Recall, F1 Score')
 
 plt.savefig(
-    f'./plots/02_com_low_data_augmentation_batch_{BATCH_SIZE}_layers_{DENSE_LAYERS}.png')
+    f'./plots/02_com_low_1_data_augmentation_batch_{BATCH_SIZE}_layers_{DENSE_LAYERS}.png')
 plt.tight_layout()
 # plt.show()
