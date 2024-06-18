@@ -22,7 +22,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 BATCH_SIZE = 64
 IMG_SIZE = 150
 NUM_CLASSES = 10  # nº classes para identificar
-NUM_EPOCHS = 60  # Further increase number of epochs
+NUM_EPOCHS = 100  # Further increase number of epochs
 LEARNING_RATE = 0.0001  # Slightly higher learning rate
 DENSE_LAYERS = [1024, 512, 256, 128]
 
@@ -37,11 +37,11 @@ test_dir = './dataset/test'
 # Add more aggressive data augmentation
 train_datagen = ImageDataGenerator(
     rescale=1./255,
-    rotation_range=60,  # Increase rotation range
-    width_shift_range=0.3,  # Increase width shift range
-    height_shift_range=0.3,  # Increase height shift range
-    shear_range=0.3,  # Increase shear range
-    zoom_range=0.3,  # Increase zoom range
+    rotation_range=20,  # Increase rotation range
+    width_shift_range=0.1,  # Increase width shift range
+    height_shift_range=0.1,  # Increase height shift range
+    shear_range=0.1,  # Increase shear range
+    zoom_range=0.1,  # Increase zoom range
     horizontal_flip=True,
     vertical_flip=True,  # Additional augmentation
     brightness_range=[0.6, 1.4],  # Increase brightness range
