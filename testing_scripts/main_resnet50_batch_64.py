@@ -112,7 +112,7 @@ model.summary()
 
 # Define callbacks
 os.makedirs('outputs', exist_ok=True)
-checkpoint = ModelCheckpoint("models/best_model_main_resnet50_batch_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.keras",
+checkpoint = ModelCheckpoint("models/best_model_main_resnet50_batch_64_image_32_layers_[256,512,1024,1024].keras",
                              monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 early_stopping = EarlyStopping(
     monitor='val_loss', patience=10, restore_best_weights=True)  # Increased patience
