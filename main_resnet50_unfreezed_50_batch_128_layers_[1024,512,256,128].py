@@ -240,9 +240,9 @@ plt.ylim([0, 1])
 plt.legend(loc='lower right')
 plt.title('Validation Precision, Recall, F1 Score')
 
+plt.savefig(f'./plots/resnet50_unfreezed_50_batch_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.png')
 plt.tight_layout()
-plt.show()
-plt.savefig('./plots/resnet50_unfreezed_50_batch_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.png')
+#plt.show()
 
 # %%
 

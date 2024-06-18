@@ -145,7 +145,7 @@ plt.ylim([0, 1])
 plt.legend(loc='lower right')
 plt.title('Training and Validation Accuracy')
 plt.savefig('outputs/training_accuracy_plot.png')
-plt.show()
+#plt.show()
 
 # Save training logs
 with open('outputs/training_logs.json', 'w') as f:

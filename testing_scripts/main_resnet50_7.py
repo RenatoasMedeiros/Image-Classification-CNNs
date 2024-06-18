@@ -142,7 +142,7 @@ plt.ylim([0, 1])
 plt.legend(loc='lower right')
 plt.title('Training and Validation Accuracy')
 plt.savefig('outputs/resnet50_7.png')
-plt.show()
+#plt.show()
 
 # Save training logs
 with open('outputs/training_history_model_resnet50_7.json', 'w') as f:

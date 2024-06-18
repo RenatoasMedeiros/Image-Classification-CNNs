@@ -71,7 +71,7 @@ def plot_images(images_arr):
         ax.axis('off')
     plt.tight_layout()
     plt.savefig('./plot.png')
-    plt.show()
+    #plt.show()
 
 # Generate a batch of images and display them
 sample_batch = next(train_generator)
@@ -128,4 +128,4 @@ plt.xlabel('Epoch')
 plt.ylabel('Accuracy')
 plt.ylim([0, 1])
 plt.legend(loc='lower right')
-plt.show()
+#plt.show()

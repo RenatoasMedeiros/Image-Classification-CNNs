@@ -231,8 +231,8 @@ plt.ylim([0, 1])
 plt.legend(loc='lower right')
 plt.title('Validation Precision, Recall, F1 Score')
 
+plt.savefig(f'./plots/02_com_data_augmentation_batch_{BATCH_SIZE}_layers_{DENSE_LAYERS}.png')
 plt.tight_layout()
-plt.show()
-plt.savefig('./plots/02_com_data_augmentation.png')
+#plt.show()
 
 
