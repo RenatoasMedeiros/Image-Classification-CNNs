@@ -11,7 +11,7 @@ from tensorflow.keras.applications import Xception
 from tensorflow.keras.applications.xception import preprocess_input
 from keras.utils import Sequence
 
-# Define constants
+# CONSTANTES
 BATCH_SIZE = 32
 IMG_SIZE = 71  # Adjusted for Xception model
 NUM_CLASSES = 10
@@ -74,7 +74,7 @@ total_train_images = count_files_in_dirs(train_dirs)
 print(f"Total number of images in train dataset: {total_train_images}")
 
 
-# Create image data generators with preprocessing
+# CRIAR OS GERADORES with preprocessing
 train_datagen = ImageDataGenerator(
     preprocessing_function=preprocess_input,
     rotation_range=40,
@@ -89,7 +89,7 @@ validation_datagen = ImageDataGenerator(
     preprocessing_function=preprocess_input)
 test_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
 
-# Create multiple train generators
+# training generators
 train_generators = [train_datagen.flow_from_directory(
     train_dir,
     target_size=(IMG_SIZE, IMG_SIZE),

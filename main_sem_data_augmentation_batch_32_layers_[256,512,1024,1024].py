@@ -11,10 +11,10 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 # %%
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-# Define constants
+# CONSTANTES
 BATCH_SIZE = 32
 IMG_SIZE = 32
-NUM_CLASSES = 10  # Number of classes to identify
+NUM_CLASSES = 10  # nº classes para identificar
 NUM_EPOCHS = 30
 LEARNING_RATE = 0.001
 DENSE_LAYERS = [256, 512, 1024, 1024]
@@ -26,20 +26,20 @@ validation_dir = './dataset/validation'
 test_dir = './dataset/test'
 
 # %%
-# Create image data generators without augmentation
+# CRIAR OS GERADORES without augmentation
 train_datagen = ImageDataGenerator(rescale=1./255)
 
 validation_datagen = ImageDataGenerator(rescale=1./255)
 test_datagen = ImageDataGenerator(rescale=1./255)
 
-# Create multiple train generators
+# training generators
 train_generators = [train_datagen.flow_from_directory(
     train_dir,
     target_size=(IMG_SIZE, IMG_SIZE),
     batch_size=BATCH_SIZE,
     class_mode='categorical') for train_dir in train_dirs]
 
-# Custom generator to merge multiple directories
+# Necessário para junstar os trainning generators
 def combined_generator(generators):
     while True:
         for generator in generators:
@@ -47,7 +47,7 @@ def combined_generator(generators):
 
 train_generator = combined_generator(train_generators)
 
-# Validation and test generators
+# Validation e test generators
 validation_generator = validation_datagen.flow_from_directory(
     validation_dir,
     target_size=(IMG_SIZE, IMG_SIZE),

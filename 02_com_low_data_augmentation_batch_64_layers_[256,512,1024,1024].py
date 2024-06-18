@@ -11,10 +11,10 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 # %%
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-# Define constants
-BATCH_SIZE = 256
+# CONSTANTES
+BATCH_SIZE = 64
 IMG_SIZE = 32
-NUM_CLASSES = 10  # Number of classes to identify
+NUM_CLASSES = 10  # nº classes para identificar
 NUM_EPOCHS = 30
 LEARNING_RATE = 0.001
 DENSE_LAYERS = [256, 512, 1024, 1024]
@@ -26,28 +26,38 @@ validation_dir = './dataset/validation'
 test_dir = './dataset/test'
 
 # %%
-# Create image data generators without augmentation
-train_datagen = ImageDataGenerator(rescale=1./255)
+train_datagen = ImageDataGenerator(
+    rescale=1./255,
+    rotation_range=15,
+    width_shift_range=0.1,
+    height_shift_range=0.1,
+    shear_range=0.1,
+    zoom_range=0.05,
+    horizontal_flip=True,
+    fill_mode='nearest')
 
 validation_datagen = ImageDataGenerator(rescale=1./255)
 test_datagen = ImageDataGenerator(rescale=1./255)
 
-# Create multiple train generators
+# training generators
 train_generators = [train_datagen.flow_from_directory(
     train_dir,
     target_size=(IMG_SIZE, IMG_SIZE),
     batch_size=BATCH_SIZE,
     class_mode='categorical') for train_dir in train_dirs]
 
-# Custom generator to merge multiple directories
+# Necessário para junstar os trainning generators
+
+
 def combined_generator(generators):
     while True:
         for generator in generators:
             yield next(generator)
 
+
 train_generator = combined_generator(train_generators)
 
-# Validation and test generators
+# Validation e test generators
 validation_generator = validation_datagen.flow_from_directory(
     validation_dir,
     target_size=(IMG_SIZE, IMG_SIZE),
@@ -122,6 +132,10 @@ class F1Score(Metric):
         self.recall.reset_states()
 
 
+# %% [markdown]
+# # Novas layers
+# Conv2D
+
 # %%
 model = Sequential([
     Conv2D(DENSE_LAYERS[0], (3, 3), input_shape=(IMG_SIZE, IMG_SIZE, 3)),
@@ -156,13 +170,22 @@ model.compile(optimizer=Adam(learning_rate=LEARNING_RATE),
               loss='categorical_crossentropy',
               metrics=['accuracy', Precision(), Recall(), F1Score()])
 
+
 model.summary()
 
 # %%
-# Define callbacks
-checkpoint = ModelCheckpoint("models/main_sem_data_augmentation_batch_256_image_32_layers_[256,512,1024,1024].keras", monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+# Definir os Callbacks
+
+# Para salvar o melhor modelo com base na acurácia de validação
+checkpoint = ModelCheckpoint("models/02_com_data_augmentation_batch_size_64_layers_[256,512,1024,1024].keras", monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+
+# Parar o treinamento se não houver melhoria na loss após x epochs
 early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
-csv_logger = CSVLogger(f'logs/main_sem_data_augmentation_batch_{BATCH_SIZE}_image_size_{IMG_SIZE}.csv', append=True)
+
+# Salvar para csv
+csv_logger = CSVLogger(f'logs/02_com_data_augmentation_batch_size_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.csv', append=True)
+
+# Reduzir a learning rate se não houver melhoria na loss após x epochs (lembrar de deixar este valor sempre menor que a patience no early_stopping!!)
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, verbose=1)
 
 # %%
@@ -180,6 +203,7 @@ history = model.fit(
 )
 
 # Evaluate the model
+# Evaluate the model
 results = model.evaluate(test_generator)
 loss, accuracy, precision, recall, f1_score = results[:5]
 print(f"Test Loss: {loss}")
@@ -187,6 +211,7 @@ print(f"Test Accuracy: {accuracy}")
 print(f"Test Precision: {precision}")
 print(f"Test Recall: {recall}")
 print(f"Test F1 Score: {f1_score}")
+
 
 # %%
 # Plot training history
@@ -210,11 +235,8 @@ plt.ylim([0, 1])
 plt.legend(loc='lower right')
 plt.title('Validation Precision, Recall, F1 Score')
 
-plt.savefig(f'./plots/main_sem_data_augmentation_batch_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.png')
+plt.savefig(f'./plots/02_com_data_augmentation_batch_{BATCH_SIZE}_layers_{DENSE_LAYERS}.png')
 plt.tight_layout()
 #plt.show()
-
-# %%
-
 
 
