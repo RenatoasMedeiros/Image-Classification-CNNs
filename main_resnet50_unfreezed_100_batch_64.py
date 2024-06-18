@@ -1,3 +1,4 @@
+# %%
 import json
 import os
 import matplotlib.pyplot as plt
@@ -10,8 +11,12 @@ from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.mixed_precision import set_global_policy
 
+
+# %%
 # Enable mixed precision training
 set_global_policy('mixed_float16')
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # Define constants
 BATCH_SIZE = 64
@@ -20,12 +25,14 @@ NUM_CLASSES = 10  # Number of classes to identify
 NUM_EPOCHS = 60  # Further increase number of epochs
 LEARNING_RATE = 0.0001  # Slightly higher learning rate
 
+# %%
 # Define directories
 train_dirs = ['./dataset/train/train1', './dataset/train/train2',
               './dataset/train/train3', './dataset/train/train5']
 validation_dir = './dataset/validation'
 test_dir = './dataset/test'
 
+# %%
 # Add more aggressive data augmentation
 train_datagen = ImageDataGenerator(
     rescale=1./255,
@@ -82,6 +89,7 @@ base_model = ResNet50(weights='imagenet', include_top=False,
 for layer in base_model.layers[-100:]:
     layer.trainable = True
 
+# %%
 # Define the model with adjusted parameters to reduce overfitting
 model = Sequential([
     base_model,
@@ -109,6 +117,7 @@ model.compile(optimizer=Adam(learning_rate=LEARNING_RATE),
 
 model.summary()
 
+# %%
 # Define callbacks
 os.makedirs('outputs', exist_ok=True)
 checkpoint = ModelCheckpoint("models/best_model_resnet50_7.keras",
@@ -118,12 +127,14 @@ early_stopping = EarlyStopping(
 reduce_lr = ReduceLROnPlateau(
     monitor='val_loss', factor=0.2, patience=4, min_lr=1e-7, verbose=1)  # More aggressive schedule
 csv_logger = CSVLogger(
-    'outputs/training_log_resnet50_7.csv', separator=',', append=False)
+    'outputs/main_resnet50_unfreezed_100_batch_64.csv', separator=',', append=False)
 
 # Calculate steps per epoch
 steps_per_epoch = sum([gen.samples // BATCH_SIZE for gen in train_generators])
 validation_steps = validation_generator.samples // BATCH_SIZE
 
+# %%
+# Calculate steps per epoch
 # Train the model
 history = model.fit(
     train_generator,
@@ -134,6 +145,11 @@ history = model.fit(
     callbacks=[checkpoint, early_stopping, reduce_lr, csv_logger]
 )
 
+# Evaluate the model
+loss, accuracy = model.evaluate(test_generator)
+print("Test Accuracy:", accuracy)
+
+# %%
 # Plot training history and save the plot
 plt.figure()
 plt.plot(history.history['accuracy'], label='train_accuracy')
@@ -143,9 +159,6 @@ plt.ylabel('Accuracy')
 plt.ylim([0, 1])
 plt.legend(loc='lower right')
 plt.title('Training and Validation Accuracy')
-plt.savefig('outputs/resnet50_7.png')
 plt.show()
 
-# Save training logs
-with open('outputs/training_history_model_resnet50_7.json', 'w') as f:
-    json.dump(history.history, f)
+# %%
