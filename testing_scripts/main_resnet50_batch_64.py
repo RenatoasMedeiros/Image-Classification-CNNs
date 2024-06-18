@@ -19,6 +19,7 @@ IMG_SIZE = 150
 NUM_CLASSES = 10  # Number of classes to identify
 NUM_EPOCHS = 60  # Further increase number of epochs
 LEARNING_RATE = 0.0001  # Slightly higher learning rate
+DENSE_LAYERS = [1024, 512, 256, 128]
 
 # Define directories
 train_dirs = ['./dataset/train/train1', './dataset/train/train2',
@@ -88,15 +89,15 @@ model = Sequential([
     BatchNormalization(),
     GlobalAveragePooling2D(),
     # Increase model complexity
-    Dense(1024, activation='relu', kernel_regularizer=l2(0.03)),
+    Dense(DENSE_LAYERS[0], activation='relu', kernel_regularizer=l2(0.03)),
     Dropout(0.5),  # High dropout rate for regularization
     BatchNormalization(),
-    Dense(512, activation='relu', kernel_regularizer=l2(0.03)),
+    Dense(DENSE_LAYERS[1], activation='relu', kernel_regularizer=l2(0.03)),
     Dropout(0.5),
     BatchNormalization(),
-    Dense(256, activation='relu', kernel_regularizer=l2(0.03)),
+    Dense(DENSE_LAYERS[2], activation='relu', kernel_regularizer=l2(0.03)),
     Dropout(0.5),
-    Dense(128, activation='relu', kernel_regularizer=l2(0.03)),
+    Dense(DENSE_LAYERS[3], activation='relu', kernel_regularizer=l2(0.03)),
     Dropout(0.5),
     BatchNormalization(),
     Dense(NUM_CLASSES, activation='softmax', dtype='float32')
@@ -111,14 +112,14 @@ model.summary()
 
 # Define callbacks
 os.makedirs('outputs', exist_ok=True)
-checkpoint = ModelCheckpoint("models/best_model_main_resnet50_batch_64.keras",
+checkpoint = ModelCheckpoint("models/best_model_main_resnet50_batch_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.keras",
                              monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 early_stopping = EarlyStopping(
     monitor='val_loss', patience=10, restore_best_weights=True)  # Increased patience
 reduce_lr = ReduceLROnPlateau(
     monitor='val_loss', factor=0.2, patience=4, min_lr=1e-7, verbose=1)  # More aggressive schedule
 csv_logger = CSVLogger(
-    'outputs/main_resnet50_batch_64.csv', separator=',', append=False)
+    'outputs/main_resnet50_batch_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.csv', separator=',', append=False)
 
 # Calculate steps per epoch
 steps_per_epoch = sum([gen.samples // BATCH_SIZE for gen in train_generators])
