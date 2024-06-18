@@ -12,7 +12,7 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 BATCH_SIZE = 32
 IMG_SIZE = 32
 NUM_CLASSES = 10  # nº classes para identificar
-NUM_EPOCHS = 30
+NUM_EPOCHS = 60
 LEARNING_RATE = 0.001
 
 # Define directories

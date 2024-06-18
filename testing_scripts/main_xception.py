@@ -15,7 +15,7 @@ from keras.utils import Sequence
 BATCH_SIZE = 32
 IMG_SIZE = 71  # Adjusted for Xception model
 NUM_CLASSES = 10
-NUM_EPOCHS = 30
+NUM_EPOCHS = 60
 LEARNING_RATE = 0.001
 # Number of steps per epoch (total_train_samples // BATCH_SIZE)
 EXPECTED_TRAIN_STEPS = 1250

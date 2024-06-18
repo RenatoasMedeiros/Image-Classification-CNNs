@@ -18,7 +18,7 @@ set_global_policy('mixed_float16')
 BATCH_SIZE = 64
 IMG_SIZE = 32
 NUM_CLASSES = 10  # nº classes para identificar
-NUM_EPOCHS = 30
+NUM_EPOCHS = 60
 LEARNING_RATE = 0.0001  # Lower learning rate for fine-tuning
 
 # Define directories

@@ -15,7 +15,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 BATCH_SIZE = 64
 IMG_SIZE = 32
 NUM_CLASSES = 10  # nº classes para identificar
-NUM_EPOCHS = 30
+NUM_EPOCHS = 60
 LEARNING_RATE = 0.001
 DENSE_LAYERS = [256, 512, 1024, 1024]
 
