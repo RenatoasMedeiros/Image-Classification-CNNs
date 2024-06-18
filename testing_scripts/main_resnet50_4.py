@@ -109,14 +109,14 @@ model.compile(optimizer=Adam(learning_rate=LEARNING_RATE),  # Reduce learning ra
 model.summary()
 
 # Define callbacks
-os.makedirs('outputs', exist_ok=True)
+os.makedirs('logs', exist_ok=True)
 checkpoint = ModelCheckpoint("models/best_model_resnet50.keras",
                              monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 early_stopping = EarlyStopping(
     monitor='val_loss', patience=7, restore_best_weights=True)  # Increased patience
 reduce_lr = ReduceLROnPlateau(
     monitor='val_loss', factor=0.2, patience=2, min_lr=1e-7, verbose=1)  # More aggressive schedule
-csv_logger = CSVLogger('outputs/training_log.csv', separator=',', append=False)
+csv_logger = CSVLogger('logs/training_log.csv', separator=',', append=False)
 
 # Calculate steps per epoch
 steps_per_epoch = sum([gen.samples // BATCH_SIZE for gen in train_generators])
@@ -133,7 +133,7 @@ history = model.fit(
 )
 
 # Save the final model
-model.save('outputs/final_model_resnet50.keras')
+model.save('logs/final_model_resnet50.keras')
 
 # Plot training history and save the plot
 plt.figure()
@@ -144,9 +144,9 @@ plt.ylabel('Accuracy')
 plt.ylim([0, 1])
 plt.legend(loc='lower right')
 plt.title('Training and Validation Accuracy')
-plt.savefig('outputs/training_accuracy_plot.png')
+plt.savefig('logs/training_accuracy_plot.png')
 #plt.show()
 
 # Save training logs
-with open('outputs/training_logs.json', 'w') as f:
+with open('logs/training_logs.json', 'w') as f:
     json.dump(history.history, f)

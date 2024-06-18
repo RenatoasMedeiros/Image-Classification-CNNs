@@ -160,9 +160,9 @@ model.summary()
 
 # %%
 # Define callbacks
-checkpoint = ModelCheckpoint("main_sem_data_augmentation_batch_32_image_32_layers_[256,512,1024,1024].keras", monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+checkpoint = ModelCheckpoint("models/main_sem_data_augmentation_batch_32_image_32_layers_[256,512,1024,1024].keras", monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
-csv_logger = CSVLogger(f'main_sem_data_augmentation_batch_size_{BATCH_SIZE}_image_size_{IMG_SIZE}.csv', append=True)
+csv_logger = CSVLogger(f'logs/main_sem_data_augmentation_batch_size_{BATCH_SIZE}_image_size_{IMG_SIZE}.csv', append=True)
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, verbose=1)
 
 # %%

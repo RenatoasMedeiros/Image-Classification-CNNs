@@ -170,7 +170,7 @@ model.summary()
 
 # %%
 # Define callbacks
-os.makedirs('outputs', exist_ok=True)
+os.makedirs('logs', exist_ok=True)
 checkpoint = ModelCheckpoint(f'models/main_resnet50_sem_data_augmentation_unfreezed_50_batch_64_image_150_layers_[1024,512,256,128].keras',
                              monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 early_stopping = EarlyStopping(
@@ -178,7 +178,7 @@ early_stopping = EarlyStopping(
 reduce_lr = ReduceLROnPlateau(
     monitor='val_loss', factor=0.2, patience=4, min_lr=1e-7, verbose=1)  # More aggressive schedule
 csv_logger = CSVLogger(
-    f'outputs/main_resnet50_sem_data_augmentation_unfreezed_50_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.csv', separator=',', append=False)
+    f'logs/main_resnet50_sem_data_augmentation_unfreezed_50_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.csv', separator=',', append=False)
 
 # Calculate steps per epoch
 steps_per_epoch = sum([gen.samples // BATCH_SIZE for gen in train_generators])

@@ -183,7 +183,7 @@ checkpoint = ModelCheckpoint("models/02_com_data_augmentation_batch_size_128_lay
 early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
 
 # Salvar para csv
-csv_logger = CSVLogger(f'outputs/02_com_data_augmentation_batch_size_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.csv', append=True)
+csv_logger = CSVLogger(f'logs/02_com_data_augmentation_batch_size_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.csv', append=True)
 
 # Reduzir a learning rate se não houver melhoria na loss após x epochs (lembrar de deixar este valor sempre menor que a patience no early_stopping!!)
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, verbose=1)
