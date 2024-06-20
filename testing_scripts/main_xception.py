@@ -20,7 +20,7 @@ LEARNING_RATE = 0.001
 # Number of steps per epoch (total_train_samples // BATCH_SIZE)
 EXPECTED_TRAIN_STEPS = 1250
 
-# Define directories
+# Folders do dataset
 train_dir = './dataset/train'
 train_dirs = ['./dataset/train/train1', './dataset/train/train2',
               './dataset/train/train3', './dataset/train/train5']
@@ -159,7 +159,7 @@ base_model = Xception(weights='imagenet', include_top=False,
 for layer in base_model.layers:
     layer.trainable = False
 
-# Define the model
+# Definir as layers do modelo
 model = Sequential([
     base_model,
     Flatten(),
@@ -172,7 +172,7 @@ model = Sequential([
     Dense(NUM_CLASSES, activation='softmax')
 ])
 
-# Compile the model
+# Compilar o modelo
 model.compile(optimizer=Adam(learning_rate=LEARNING_RATE),
               loss='categorical_crossentropy',
               metrics=['accuracy'])
@@ -190,19 +190,19 @@ class CustomModelCheckpoint(ModelCheckpoint):
             super().on_epoch_end(epoch, logs)
 
 
-# Define callbacks
+# CALLBACKS
 checkpoint = CustomModelCheckpoint(
     "best_model_xception.keras", monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 early_stopping = EarlyStopping(
     monitor='val_loss', patience=5, restore_best_weights=True)
 
-# Calculate steps per epoch
+# calcular passos por epoch
 total_train_samples = sum([gen.samples for gen in train_generators])
 steps_per_epoch = total_train_samples // BATCH_SIZE
 print(f"total_train_samples = {total_train_samples}")
 print(f"steps_per_epoch = {steps_per_epoch}")
 
-# Train the model using the custom data generator
+# Treinar o modelo - Nao tirar os callbacks using the custom data generator
 history = model.fit(
     custom_train_generator,
     steps_per_epoch=steps_per_epoch,
@@ -212,11 +212,11 @@ history = model.fit(
     callbacks=[checkpoint, early_stopping]
 )
 
-# Evaluate the model
+# Avaliar o modelo no test generator
 loss, accuracy = model.evaluate(test_generator)
 print("Test Accuracy:", accuracy)
 
-# Plot training history
+# Plots do treino
 plt.plot(history.history['accuracy'], label='train_accuracy')
 plt.plot(history.history['val_accuracy'], label='val_accuracy')
 plt.xlabel('Epoch')

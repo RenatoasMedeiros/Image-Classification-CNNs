@@ -11,7 +11,7 @@ from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.mixed_precision import set_global_policy
 from tensorflow.keras.regularizers import l2
 
-# Enable mixed precision training
+# MIX precision training -- facilita no treino!
 set_global_policy('mixed_float16')
 
 # CONSTANTES
@@ -21,7 +21,7 @@ NUM_CLASSES = 10  # nº classes para identificar
 NUM_EPOCHS = 60
 LEARNING_RATE = 0.0001  # Lower learning rate for fine-tuning
 
-# Define directories
+# Folders do dataset
 train_dirs = ['./dataset/train/train1', './dataset/train/train2',
               './dataset/train/train3', './dataset/train/train5']
 validation_dir = './dataset/validation'
@@ -50,7 +50,7 @@ train_generators = [train_datagen.flow_from_directory(
     batch_size=BATCH_SIZE,
     class_mode='categorical') for train_dir in train_dirs]
 
-# Necessário para junstar os trainning generators and repeat
+# Necessário para juntar os trainning generators and repeat
 
 
 def combined_generator(generators):
@@ -75,15 +75,14 @@ test_generator = test_datagen.flow_from_directory(
     batch_size=BATCH_SIZE,
     class_mode='categorical')
 
-# Load the pre-trained ResNet50 model without the top layer and adjust input shape
-base_model = ResNet50(weights='imagenet', include_top=False,
-                      input_shape=(IMG_SIZE, IMG_SIZE, 3))
+# load do modelo ResNet50 - deixar include_top=False 
+base_model = ResNet50(weights='imagenet', include_top=False,input_shape=(IMG_SIZE, IMG_SIZE, 3))
 
-# Unfreeze some top layers of the base model
+# Descongelar camadas (nao meter valores demasiado altos)
 for layer in base_model.layers[-100:]:
     layer.trainable = True
 
-# Define the model
+# Definir as layers do modelo
 model = Sequential([
     base_model,
     BatchNormalization(),
@@ -100,27 +99,27 @@ model = Sequential([
 ])
 
 
-# Compile the model
+# Compilar o modelo
 model.compile(optimizer=Adam(learning_rate=LEARNING_RATE),
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 model.summary()
 
-# Define callbacks
+# CALLBACKS
 checkpoint = ModelCheckpoint("models/best_model_resnet50.keras",
                              monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 early_stopping = EarlyStopping(
     monitor='val_loss', patience=10, restore_best_weights=True)
-# reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=4, min_lr=0.00001, verbose=1)
+
 reduce_lr = ReduceLROnPlateau(
     monitor='val_loss', factor=0.2, patience=3, min_lr=1e-7, verbose=1)
 
-# Calculate steps per epoch
+# calcular passos por epoch
 steps_per_epoch = sum([gen.samples // BATCH_SIZE for gen in train_generators])
 validation_steps = validation_generator.samples // BATCH_SIZE
 
-# Train the model
+# Treinar o modelo - Nao tirar os callbacks
 history = model.fit(
     train_generator,
     steps_per_epoch=steps_per_epoch,
@@ -130,11 +129,11 @@ history = model.fit(
     callbacks=[checkpoint, early_stopping, reduce_lr]
 )
 
-# Evaluate the model
+# Avaliar o modelo no test generator
 loss, accuracy = model.evaluate(test_generator)
 print("Test Accuracy:", accuracy)
 
-# Plot training history
+# Plots do treino
 plt.plot(history.history['accuracy'], label='train_accuracy')
 plt.plot(history.history['val_accuracy'], label='val_accuracy')
 plt.xlabel('Epoch')
