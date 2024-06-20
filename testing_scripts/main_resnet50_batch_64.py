@@ -10,34 +10,34 @@ from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.mixed_precision import set_global_policy
 
-# Enable mixed precision training
+# MIX precision training -- facilita no treino!
 set_global_policy('mixed_float16')
 
 # CONSTANTES
 BATCH_SIZE = 64
 IMG_SIZE = 150
 NUM_CLASSES = 10  # nº classes para identificar
-NUM_EPOCHS = 60  # Further increase number of epochs
-LEARNING_RATE = 0.0001  # Slightly higher learning rate
+NUM_EPOCHS = 60  
+LEARNING_RATE = 0.0001  
 DENSE_LAYERS = [1024, 512, 256, 128]
 
-# Define directories
+# Folders do dataset
 train_dirs = ['./dataset/train/train1', './dataset/train/train2',
               './dataset/train/train3', './dataset/train/train5']
 validation_dir = './dataset/validation'
 test_dir = './dataset/test'
 
-# Add more aggressive data augmentation
+# Data Augmentation
 train_datagen = ImageDataGenerator(
     rescale=1./255,
     rotation_range=60,  # Increase rotation range
-    width_shift_range=0.3,  # Increase width shift range
-    height_shift_range=0.3,  # Increase height shift range
-    shear_range=0.3,  # Increase shear range
-    zoom_range=0.3,  # Increase zoom range
+    width_shift_range=0.3,  
+    height_shift_range=0.3,  
+    shear_range=0.3,  
+    zoom_range=0.3,  
     horizontal_flip=True,
-    vertical_flip=True,  # Additional augmentation
-    brightness_range=[0.6, 1.4],  # Increase brightness range
+    vertical_flip=True,  # Adicionar flip vertical
+    brightness_range=[0.6, 1.4],  # Adicionar range te brilho
     fill_mode='nearest')
 
 validation_datagen = ImageDataGenerator(rescale=1./255)
@@ -50,7 +50,7 @@ train_generators = [train_datagen.flow_from_directory(
     batch_size=BATCH_SIZE,
     class_mode='categorical') for train_dir in train_dirs]
 
-# Necessário para junstar os trainning generators and repeat
+# Necessário para juntar os trainning generators and repeat
 
 
 def combined_generator(generators):
@@ -75,15 +75,14 @@ test_generator = test_datagen.flow_from_directory(
     batch_size=BATCH_SIZE,
     class_mode='categorical')
 
-# Load the pre-trained ResNet50 model without the top layer and adjust input shape
-base_model = ResNet50(weights='imagenet', include_top=False,
-                      input_shape=(IMG_SIZE, IMG_SIZE, 3))
+# load do modelo ResNet50 - deixar include_top=False 
+base_model = ResNet50(weights='imagenet', include_top=False,input_shape=(IMG_SIZE, IMG_SIZE, 3))
 
-# Unfreeze some top layers of the base model
+# Descongelar camadas (nao meter valores demasiado altos)
 for layer in base_model.layers[-100:]:
     layer.trainable = True
 
-# Define the model with adjusted parameters to reduce overfitting
+# Definir as layers do modelo with adjusted parameters to reduce overfitting
 model = Sequential([
     base_model,
     BatchNormalization(),
@@ -103,14 +102,14 @@ model = Sequential([
     Dense(NUM_CLASSES, activation='softmax', dtype='float32')
 ])
 
-# Compile the model
+# Compilar o modelo
 model.compile(optimizer=Adam(learning_rate=LEARNING_RATE),
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 model.summary()
 
-# Define callbacks
+# CALLBACKS
 os.makedirs('logs', exist_ok=True)
 checkpoint = ModelCheckpoint("models/best_model_main_resnet50_batch_64_image_32_layers_[256,512,1024,1024].keras",
                              monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
@@ -121,11 +120,11 @@ reduce_lr = ReduceLROnPlateau(
 csv_logger = CSVLogger(
     'logs/main_resnet50_batch_{BATCH_SIZE}_image_size_{IMG_SIZE}_layers_{DENSE_LAYERS}.csv', separator=',', append=False)
 
-# Calculate steps per epoch
+# calcular passos por epoch
 steps_per_epoch = sum([gen.samples // BATCH_SIZE for gen in train_generators])
 validation_steps = validation_generator.samples // BATCH_SIZE
 
-# Train the model
+# Treinar o modelo - Nao tirar os callbacks
 history = model.fit(
     train_generator,
     steps_per_epoch=steps_per_epoch,
@@ -135,7 +134,7 @@ history = model.fit(
     callbacks=[checkpoint, early_stopping, reduce_lr, csv_logger]
 )
 
-# Plot training history and save the plot
+# Plots do treino and save the plot
 plt.figure()
 plt.plot(history.history['accuracy'], label='train_accuracy')
 plt.plot(history.history['val_accuracy'], label='val_accuracy')

@@ -20,7 +20,7 @@ LEARNING_RATE = 0.001
 DENSE_LAYERS = [256, 512, 1024, 1024]
 
 # %%
-# Define directories
+# Folders do dataset
 train_dirs = ['./dataset/train/train1', './dataset/train/train2', './dataset/train/train3', './dataset/train/train5']
 validation_dir = './dataset/validation'
 test_dir = './dataset/test'
@@ -161,7 +161,7 @@ model = Sequential([
     Dense(NUM_CLASSES, activation='softmax')
 ])
 
-# Compile the model
+# Compilar o modelo
 model.compile(optimizer=Adam(learning_rate=LEARNING_RATE),
               loss='categorical_crossentropy',
               metrics=['accuracy', Precision(), Recall(), F1Score()])
@@ -185,10 +185,10 @@ csv_logger = CSVLogger(f'logs/02_com_data_augmentation_batch_size_{BATCH_SIZE}_i
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, verbose=1)
 
 # %%
-# Calculate steps per epoch
+# calcular passos por epoch
 steps_per_epoch = sum([gen.samples // BATCH_SIZE for gen in train_generators])
 
-# Train the model
+# Treinar o modelo - Nao tirar os callbacks
 history = model.fit(
     train_generator,
     steps_per_epoch=steps_per_epoch,
@@ -198,8 +198,8 @@ history = model.fit(
     callbacks=[checkpoint, early_stopping, csv_logger, reduce_lr]
 )
 
-# Evaluate the model
-# Evaluate the model
+# Avaliar o modelo no test generator
+# Avaliar o modelo no test generator
 results = model.evaluate(test_generator)
 loss, accuracy, precision, recall, f1_score = results[:5]
 print(f"Test Loss: {loss}")
@@ -210,7 +210,7 @@ print(f"Test F1 Score: {f1_score}")
 
 
 # %%
-# Plot training history
+# Plots do treino
 plt.figure(figsize=(12, 8))
 plt.subplot(2, 1, 1)
 plt.plot(history.history['accuracy'], label='train_accuracy')
