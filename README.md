@@ -1,3 +1,4 @@
+# Trabalho realizado por: Carlos Franco (2212574) Renato Medeiros (2211029)
 # FOLDER STRUTURE
 
 # dataset
@@ -30,4 +31,3 @@ Contém plots que foram gerados no treino dos modelos
 NOTA:
 Existem vários ficheiros ".py" pois facilitava o treino de vários modelos seguidamente sem interação nossa, isso atravez do script "run_all_scripts.py" que criamos, esse script encontra-se no folder "scripts"
 
-# Trabalho realizado por: Carlos Franco (2212574) Renato Medeiros (2211029)
