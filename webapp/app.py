@@ -73,7 +73,7 @@ class F1Score(Metric):
 
 
 # Load your trained model with custom metric (F1Score)
-model = load_model('model.keras', custom_objects={'F1Score': F1Score})
+model = load_model('bestmodel.keras', custom_objects={'F1Score': F1Score})
 
 # Define the class names (assuming you have 10 classes)
 class_names = ['airplane', 'automobile', 'bird', 'cat',
@@ -101,7 +101,7 @@ def predict():
     if file:
         # Preprocess the image
         img = Image.open(file)
-        img = img.resize((150, 150))  # Resize to the size your model expects
+        img = img.resize((150, 150))  # Resize to the size your model expects!!!!!!
         img = img.convert('RGB')    # Ensure it has 3 channels
         img_array = np.array(img) / 255.0  # Normalize to [0, 1]
         img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
