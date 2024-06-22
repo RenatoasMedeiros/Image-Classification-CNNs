@@ -140,7 +140,7 @@ class F1Score(Metric):
 
 
 # %%
-# Definir as layers do modelo with adjusted parameters to reduce overfitting
+# Definir as layers do modelo com parametros ajustados para reduzir o overfitting
 model = Sequential([
     base_model,
     BatchNormalization(),

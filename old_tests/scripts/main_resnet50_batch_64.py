@@ -82,7 +82,7 @@ base_model = ResNet50(weights='imagenet', include_top=False,input_shape=(IMG_SIZ
 for layer in base_model.layers[-100:]:
     layer.trainable = True
 
-# Definir as layers do modelo with adjusted parameters to reduce overfitting
+# Definir as layers do modelo com parametros ajustados para reduzir o overfitting
 model = Sequential([
     base_model,
     BatchNormalization(),

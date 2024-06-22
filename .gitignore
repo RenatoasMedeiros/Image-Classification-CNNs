@@ -15,5 +15,3 @@ test.py
 .keras/
 .local/
 .nv/
-features.npy
-labels.npy
