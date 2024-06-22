@@ -1,5 +1,6 @@
 import subprocess
 
+# Python script feito para deixar a correr todos os scripts automaticamente (e.g: Durante a noite)
 scripts = [
     'main_sem_data_augmentation_batch_32_layers_[256,512,1024,1024].py',
     'main_sem_data_augmentation_batch_64_layers_[256,512,1024,1024].py',
